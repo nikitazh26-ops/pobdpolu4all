@@ -1,19 +1,21 @@
-
 name: Telegram Casting Bot
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 */5 * * *'
+    - cron: '17 */5 * * *'   # запасной вариант, не на круглой минуте
 
 concurrency:
   group: telegram-casting-bot
-  cancel-in-progress: true
+  cancel-in-progress: false   # новый запуск ждёт, а не убивает работающий
+
+permissions:
+  actions: write
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 355
 
     steps:
       - uses: actions/checkout@v4
@@ -27,4 +29,10 @@ jobs:
       - name: Start bot
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: python bot.py
+        run: timeout 340m python bot.py || true
+
+      - name: Start next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run bot.yml --ref main
