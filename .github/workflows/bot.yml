@@ -3,6 +3,12 @@ name: Telegram Casting Bot
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 */5 * * *'
+
+concurrency:
+  group: telegram-casting-bot
+  cancel-in-progress: true
 
 jobs:
   run-bot:
